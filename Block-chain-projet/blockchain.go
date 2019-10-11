@@ -1,9 +1,13 @@
 package main
 
-//4.引入区块链
+//4.引入区块链   blockchain 结构重写
 type BlockChain struct {
 	//定义一个区块链数组
 	blocks []*Block
+	//db *bolt.DB
+
+
+	tail []byte
 }
 //5.定义一个区块链
 func NewBlockChain() *BlockChain  {
