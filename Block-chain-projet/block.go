@@ -2,6 +2,8 @@ package main
 
 import (
 	"bytes"
+	"encoding/gob"
+	"fmt"
 
 	"encoding/binary"
 	"log"
@@ -53,6 +55,32 @@ func NewBlock(data string,prevBlockHash []byte) *Block  {
 	//最后返回给block
 
 
+}
+func (block *Block)Serialize()[]byte  {  //编码工作 序列化  转成字节流
+	var buffer  bytes.Buffer
+	//使用一个辅助变量buffer  编码好的数据放进  buffer
+	//分别定义一个  编码器  和解码器
+	//1.编码器
+	encoder := gob.NewEncoder(&buffer)
+	err := encoder.Encode(&block)
+
+	if err != nil {
+		log.Panic("编码出错，小明失踪")
+	}
+	fmt.Printf("编码成功 : %v \n",buffer.Bytes())
+	return buffer.Bytes()
+}
+
+func Deserialize(data []byte) Block  {
+	decoder := gob.NewDecoder(bytes.NewReader(data))
+	//那么数据在解码器中   接下来解码
+	var block Block
+
+	err := decoder.Decode(&block)
+	if err != nil{
+		log.Panic("deconder failed")
+	}
+	return block
 }
 
 //3.生成HASH
