@@ -53,7 +53,7 @@ func (pow *ProofOFWork) Run() ([]byte,uint64)  {
 			Uint64ToByte(block.TimeStamp),
 			Uint64ToByte(block.Difficulty),
 			Uint64ToByte(nonce),
-			block.Data,
+			//block.Data,
 
 		}
 		blockInfo :=bytes.Join(tmp,[]byte{})

@@ -25,15 +25,16 @@ type Block struct {
 	//当前区块HASH
 	Hash []byte
 	//区块数据
-	Data []byte
+	//Data []byte
+	Transactions []*Transaction   //真实交易数组
 }
 
 //2.创建区块
-func NewBlock(data string,prevBlockHash []byte) *Block  {
+func NewBlock(txs []*Transaction ,prevBlockHash []byte) *Block  {
 	block :=Block{
 		PrevHash: prevBlockHash,
 		Hash:     []byte{},
-		Data:     []byte(data),
+		Transactions :txs,
 		Version:00,
 		MerkelRoot:[]byte{},
 		TimeStamp:uint64(time.Now().Unix()),
@@ -41,6 +42,7 @@ func NewBlock(data string,prevBlockHash []byte) *Block  {
 		Difficulty:0,        //无效值   无法知道困难梯度
 	}
 	//block.SetHash()
+	block.MerkelRoot = block.MakeMerkelRoot()
 	pow := NewProofOFWork(&block)
 
 	//创建一个pow对象
@@ -125,3 +127,7 @@ func Uint64ToByte(num uint64 ) []byte {      //func XXX()括号里面 传入参�
 	return buffer.Bytes()
 
 }
+func (block *Block)MakeMerkelRoot() []byte  {
+	//TODO
+	return []byte{}
+} //对交易数据进行简单拼接 不做二叉树处理
