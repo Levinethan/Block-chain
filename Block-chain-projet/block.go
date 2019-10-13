@@ -2,10 +2,8 @@ package main
 
 import (
 	"bytes"
-	"encoding/gob"
-	"fmt"
-
 	"encoding/binary"
+	"encoding/gob"
 	"log"
 	"time"
 )
@@ -67,7 +65,7 @@ func (block *Block)Serialize()[]byte  {  //编码工作 序列化  转成字节�
 	if err != nil {
 		log.Panic("编码出错，小明失踪")
 	}
-	fmt.Printf("编码成功 : %v \n",buffer.Bytes())
+
 	return buffer.Bytes()
 }
 

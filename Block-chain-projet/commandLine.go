@@ -1,19 +1,15 @@
 package main
 
-//import "fmt"
+import "fmt"
 
+func (cli *CLI)AddBlock (data string) {
+	cli.bc.AddBlock(data)
+	fmt.Printf("添加区块成功 \n")
+}
 
-
-func main()  {
-	bc := NewBlockChain()
-	cli :=CLI{bc:bc}
-	cli.Run()
-
-
-	//bc.AddBlock("111111111111111111")
-	//bc.AddBlock("222222222222222222")
-	//it := bc.NewInterator()
-/*
+func (cli *CLI)PrintBlockChain () {
+	bc := cli.bc
+	it := bc.NewInterator()
 	for {
 		block := it.Next() //返回区块 然后左移
 		fmt.Printf("版本号 %d\n",block.Version)
@@ -29,7 +25,4 @@ func main()  {
 			break
 		}
 	}
-
-*/
 }
-
