@@ -2,10 +2,7 @@ package main
 
 import "fmt"
 
-func (cli *CLI)AddBlock (data string) {
-	//cli.bc.AddBlock(data) TODO
-	fmt.Printf("添加区块成功 \n")
-}
+
 //正向打印
 func (cli *CLI)PrintBlockChain () {
 	cli.bc.Printchain()
@@ -35,10 +32,25 @@ func (cli *CLI)GetBalance(address string)  {
 	utxos :=cli.bc.FindUTXOs(address)
 	total := 0.0
 	for _, utxo := range utxos{
-		total += utxo.value
+		total += utxo.Value
 	}
 	fmt.Printf("%s的余额为: %f\n ",address,total)
 
 
+}
+func (cli *CLI)Send(from,to string,amount float64,miner ,data string)  {
+	fmt.Printf("from :%s\n",from)
+	fmt.Printf("to :%s\n",to)
+	fmt.Printf("amount :%f\n",amount)
+	fmt.Printf("miner :%s\n",miner)
+	fmt.Printf("data :%s\n",data)
+	coinbase := NewCoinbaseTX(miner,data)
+	tx := NewTransaction(from,to,amount,cli.bc)
+	if tx == nil{
+		fmt.Printf("无效的交易")
+		return
+	}
+	cli.bc.AddBlock([]*Transaction{coinbase,tx})
+	fmt.Printf("转账成功")
 }
 //逻辑 cli调用   实现commandline 实现
