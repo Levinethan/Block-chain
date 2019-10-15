@@ -43,7 +43,7 @@
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="nodejs_package_manager_path" value="npm" />
-    <property name="settings.editor.selected.configurable" value="terminal" />
+    <property name="settings.editor.selected.configurable" value="MTConfigurable" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -89,21 +89,22 @@
       <directory value="$PROJECT_DIR$/" />
       <method v="2" />
     </configuration>
-    <configuration name="go build commandllll.go" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+    <configuration name="ecdsa_test.go" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="block_chain" />
-      <working_directory value="$PROJECT_DIR$/" />
+      <working_directory value="$PROJECT_DIR$/demo/ecdsa_test" />
+      <framework value="gotest" />
       <kind value="FILE" />
-      <filePath value="$PROJECT_DIR$/commandllll.go" />
       <directory value="$PROJECT_DIR$/" />
+      <filePath value="$PROJECT_DIR$/demo/ecdsa_test/ecdsa_test.go" />
       <method v="2" />
     </configuration>
     <recent_temporary>
       <list>
         <item itemvalue="Go Build.go build block_chain/" />
+        <item itemvalue="Go Test.ecdsa_test.go" />
         <item itemvalue="Go Build.go build blockchain.go" />
         <item itemvalue="Go Build.go build commandLine.go" />
         <item itemvalue="Go Build.go build cli.go" />
-        <item itemvalue="Go Build.go build commandllll.go" />
       </list>
     </recent_temporary>
   </component>

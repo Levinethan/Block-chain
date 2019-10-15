@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 
 //正向打印
@@ -17,7 +20,8 @@ func (cli *CLI)PrintBlockChainReverse () {
 		fmt.Printf("版本号 %d\n",block.Version)
 		fmt.Printf("前区块HASH： %x\n",block.PrevHash)
 		fmt.Printf("merkel根 %x\n",block.MerkelRoot)
-		fmt.Printf("时间戳 : %d\n",block.TimeStamp)
+		timeFormat := time.Unix(int64(block.TimeStamp),0).Format("2006-01-02 15:04:05")
+		fmt.Printf("时间戳 : %s\n",timeFormat)
 		fmt.Printf("随机数 :%d\n",block.Nonce)
 		fmt.Printf("难度值 :%d\n",block.Difficulty)
 		fmt.Printf("当前区块HASH： %x\n",block.Hash)
@@ -54,3 +58,11 @@ func (cli *CLI)Send(from,to string,amount float64,miner ,data string)  {
 	fmt.Printf("转账成功")
 }
 //逻辑 cli调用   实现commandline 实现
+
+func (cli *CLI)NewWallet()  {
+	wallet := NewWallet()
+	address := wallet.NewAddress()
+	fmt.Printf("私钥  %v\n",wallet.Private)
+	fmt.Printf("公钥 %v\n",wallet.PubKey)
+	fmt.Printf("地址 %s\n",address)
+}

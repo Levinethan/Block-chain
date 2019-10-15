@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/binary"
 	"encoding/gob"
 	"log"
@@ -129,5 +130,13 @@ func Uint64ToByte(num uint64 ) []byte {      //func XXX()括号里面 传入参�
 }
 func (block *Block)MakeMerkelRoot() []byte  {
 	//TODO
-	return []byte{}
+	var info  []byte
+
+	for _,tx := range block.Transactions{
+		info = append(info,tx.TXID...)
+
+	}
+	hash := sha256.Sum256(info)
+
+	return hash[:]
 } //对交易数据进行简单拼接 不做二叉树处理
