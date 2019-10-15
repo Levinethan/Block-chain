@@ -60,9 +60,23 @@ func (cli *CLI)Send(from,to string,amount float64,miner ,data string)  {
 //逻辑 cli调用   实现commandline 实现
 
 func (cli *CLI)NewWallet()  {
-	wallet := NewWallet()
-	address := wallet.NewAddress()
-	fmt.Printf("私钥  %v\n",wallet.Private)
-	fmt.Printf("公钥 %v\n",wallet.PubKey)
+	ws := NewWallets()
+	//ws.CreateWallet()
+
+
+	//wallet := NewWallet()
+	address := ws.CreateWallet()
+	//ws := NewWallets()
+	//for address := range ws.WalletsMap{
 	fmt.Printf("地址 %s\n",address)
+
+	//}
+
+}
+func (cli *CLI)ListAddresses()  {
+	ws := NewWallets()
+	addresses :=ws.ListAllAddresses()
+	for _, address := range addresses{
+		fmt.Printf("地址 %s\n",address)
+	}
 }
