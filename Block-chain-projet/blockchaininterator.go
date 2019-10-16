@@ -12,7 +12,7 @@ type BlockChainInterator struct {
 	//当前指针 用来寻找区块 代替for循环
 }
 
-func (bc *BlockChain) NewInterator()*BlockChainInterator {
+func (bc *BlockChain) NewIterator()*BlockChainInterator {
 	return &BlockChainInterator{
 		db:                 bc.db,
 		currentHashPointer: bc.tail, // 最初指向区块链的最后一个区块，随着Next的调用 不断变化

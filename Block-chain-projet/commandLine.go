@@ -14,7 +14,7 @@ func (cli *CLI)PrintBlockChain () {
 //反向打印
 func (cli *CLI)PrintBlockChainReverse () {
 	bc := cli.bc
-	it := bc.NewInterator()
+	it := bc.NewIterator()
 	for {
 		block := it.Next() //返回区块 然后左移
 		fmt.Printf("版本号 %d\n",block.Version)
@@ -25,7 +25,7 @@ func (cli *CLI)PrintBlockChainReverse () {
 		fmt.Printf("随机数 :%d\n",block.Nonce)
 		fmt.Printf("难度值 :%d\n",block.Difficulty)
 		fmt.Printf("当前区块HASH： %x\n",block.Hash)
-		fmt.Printf("区块HASH数据： %s\n",block.Transactions[0].TXInputs[0].Sig)
+		fmt.Printf("区块HASH数据： %s\n",block.Transactions[0].TXInputs[0].PubKey)
 		if len(block.PrevHash)==0 {
 			fmt.Printf("遍历结束")
 			break
@@ -33,8 +33,14 @@ func (cli *CLI)PrintBlockChainReverse () {
 	}
 }
 func (cli *CLI)GetBalance(address string)  {
-	utxos :=cli.bc.FindUTXOs(address)
+	if !IsValidAddress(address){
+		fmt.Printf("地址无效 : %%s",address)
+		return
+	}
+	pubKeyHash := GetPubKeyFromAddress(address)
+	utxos :=cli.bc.FindUTXOs(pubKeyHash)
 	total := 0.0
+
 	for _, utxo := range utxos{
 		total += utxo.Value
 	}
@@ -43,11 +49,25 @@ func (cli *CLI)GetBalance(address string)  {
 
 }
 func (cli *CLI)Send(from,to string,amount float64,miner ,data string)  {
-	fmt.Printf("from :%s\n",from)
-	fmt.Printf("to :%s\n",to)
-	fmt.Printf("amount :%f\n",amount)
-	fmt.Printf("miner :%s\n",miner)
-	fmt.Printf("data :%s\n",data)
+	//fmt.Printf("from :%s\n",from)
+	//fmt.Printf("to :%s\n",to)
+	//fmt.Printf("amount :%f\n",amount)
+	//fmt.Printf("miner :%s\n",miner)
+	//fmt.Printf("data :%s\n",data)
+	if !IsValidAddress(from){
+		fmt.Printf("地址无效 from: %%s",from)
+		return
+	}
+	if !IsValidAddress(from){
+		fmt.Printf("地址无效 to: %%s",to)
+		return
+	}
+	if !IsValidAddress(from){
+		fmt.Printf("地址无效 miner: %%s",miner)
+		return
+	}
+
+
 	coinbase := NewCoinbaseTX(miner,data)
 	tx := NewTransaction(from,to,amount,cli.bc)
 	if tx == nil{

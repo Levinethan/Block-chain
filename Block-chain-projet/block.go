@@ -84,40 +84,11 @@ func Deserialize(data []byte) Block  {
 	return block
 }
 
-//3.生成HASH
-//func (block *Block) SetHash()  {
-	//var blockInfo  []byte
-	//拼装数据
-	/*
-	blockInfo =append(blockInfo,Uint64ToByte(block.Version)...)
-	blockInfo =append(blockInfo,block.PrevHash...)
-	blockInfo =append(blockInfo,block.MerkelRoot...)
-	blockInfo =append(blockInfo,Uint64ToByte(block.TimeStamp)...)
-	blockInfo =append(blockInfo,Uint64ToByte(block.Difficulty)...)
-	blockInfo =append(blockInfo,Uint64ToByte(block.Nonce)...)
-	blockInfo =append(blockInfo,block.Data...)
-
-	 */ //优化 用join函数
-	/* tmp := [][]byte{
-		 Uint64ToByte(block.Version),
-		 block.PrevHash,
-		 block.MerkelRoot,
-		 Uint64ToByte(block.TimeStamp),
-		 Uint64ToByte(block.Difficulty),
-		 Uint64ToByte(block.Nonce),
-		 block.Data,
-
-	 }
-	 blockInfo :=bytes.Join(tmp,[]byte{})
-	 //将二维的数组链接起来，返回一个一维的切片
 
 
-	//sha256加密
-	hash := sha256.Sum256(blockInfo)
-	block.Hash = hash[:]
-}
 
-	 */
+
+
 //4.实现一个辅助函数 用来转换数据类型
 func Uint64ToByte(num uint64 ) []byte {      //func XXX()括号里面 传入参数 []byte 返回一个byte类型数据
 	var buffer  bytes.Buffer
