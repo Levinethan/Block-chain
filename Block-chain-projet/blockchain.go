@@ -2,6 +2,8 @@ package main
 
 import (
 	"bytes"
+	"crypto/ecdsa"
+	"errors"
 	"fmt"
 	"github.com/boltdb/bolt"
 	"log"
@@ -62,6 +64,13 @@ func GenesisBlock(address string) *Block  {
 }
 //6.添加区块
 func (bc *BlockChain)AddBlock(txs []*Transaction)  {
+	for _,tx:= range txs{
+		if !bc.VerifyTransaction(tx){
+			//矿工发现无效交易
+			fmt.Printf("交易无效")
+			return
+		}
+	}
 	//如何获取前区块哈希hash?
 	db := bc.db
 	lastHash := bc.tail
@@ -260,3 +269,59 @@ func (bc *BlockChain) FindUTXOTransactions(senderPubKeyHash []byte) []*Transacti
 
 	return txs
 }
+
+func (bc *BlockChain)FindTransactionnByTXid(id []byte)(Transaction,error)  {
+	//给 id   返回 Transaction
+	//1遍历区块链
+	//2遍历交易
+	//3比较交易 找到了退出
+	//4如果没找到 返回空Transaction  同时返回错误状态
+	it := bc.NewIterator()
+	for{
+		block :=it.Next()
+		for _,tx:= range block.Transactions{
+			if bytes.Equal( tx.TXID,id){
+				return *tx,nil
+			}
+		}
+		if len(block.PrevHash)==0{
+			fmt.Printf("区块遍历结束！\n")
+			break
+
+		}
+
+	}
+	return Transaction{},errors.New("无法找到交易")
+}
+func (bc *BlockChain)SignTransaction(tx *Transaction,privateKey *ecdsa.PrivateKey)  {
+
+	prevTXs := make(map[string]Transaction)
+	//找到所有引用的交易 UTXO
+	for _,input := range tx.TXInputs{
+		tx ,err:= bc.FindTransactionnByTXid(input.TXid)
+		if err!=nil{
+			log.Panic(err)
+		}
+		prevTXs[string(input.TXid)] = tx
+
+	}
+	tx.Sign(privateKey,prevTXs)
+}
+
+func (bc *BlockChain)VerifyTransaction(tx *Transaction) bool {
+	if tx.IsCoinbase(){
+		return true
+	}
+	prevTXs := make(map[string]Transaction)
+	//找到所有引用的交易 UTXO
+	for _, input := range tx.TXInputs {
+		tx, err := bc.FindTransactionnByTXid(input.TXid)
+		if err != nil {
+			log.Panic(err)
+		}
+		prevTXs[string(input.TXid)] = tx
+
+	}
+	return tx.Verify(prevTXs)
+}
+

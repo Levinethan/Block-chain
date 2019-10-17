@@ -2,10 +2,15 @@ package main
 
 import (
 	"bytes"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/gob"
 	"fmt"
 	"log"
+	"math/big"
+	"strings"
 )
 const reward  =  50
 //1定义交易结构
@@ -113,7 +118,7 @@ func NewTransaction(from, to string, amount float64, bc *BlockChain) *Transactio
 	}
 	pubKey := wallet.PubKey
 
-	//privateKey := wallet.Private
+	privateKey := wallet.Private
 	pubKeyHash := HashPubKey(pubKey)
 	//===================================================================
 	//1. 找到最合理UTXO集合 map[string][]uint64
@@ -144,5 +149,129 @@ func NewTransaction(from, to string, amount float64, bc *BlockChain) *Transactio
 	}
 	tx := Transaction{[]byte{}, inputs, outputs}
 	tx.SetHash()
+	//签名，交易创建后进行签名
+	bc.SignTransaction(&tx,privateKey)
 	return &tx
+}
+func (tx *Transaction)Sign(privateKey *ecdsa.PrivateKey,prevTXs map[string]Transaction)  {
+	//具体签名
+	if tx.IsCoinbase(){
+		return
+	}
+	//1创建一个当前交易的copy  TrimmeCopy  TXCopy 把Signature 和 Pubkey
+	txCopy:= tx.TrimmedCopy()
+	//2循环遍历txCopy的inputs 得到 input 索引 output的公钥hash
+	for i,input := range txCopy.TXInputs{
+		prevTX := prevTXs[string(input.TXid)]
+		if len(prevTX.TXID) ==0{
+			log.Panic("引用的交易无效")
+		}
+		//3生成要签名的数据。签一个hash值
+		//对每个input都要签名一次 由当前input引用的output的哈希
+		//不要对input进行赋值 这是一个副本 要对txCopy。TXInputs【】进行操作否则无法把pubkey传进来
+		txCopy.TXInputs[i].PubKey = prevTX.TXOutputs[input.Index].PukKeyHash
+		//对拼接好的txCopy进行哈希处理，Sethash得到TXID ，这个TXID是我们要签名的id
+		//3生成要签名的数据。签一个hash值
+		txCopy.SetHash()
+		//还原
+		txCopy.TXInputs[i].PubKey=nil
+		signDataHash := txCopy.TXID
+		//4	签名动作得到r，s字节流 byte[]
+		r,s,err :=ecdsa.Sign(rand.Reader,privateKey,signDataHash)
+		if err != nil{
+			log.Panic(err)
+		}
+		//5放到我们所签名的input的Signature中
+		signature := append(r.Bytes(),s.Bytes()...)
+		tx.TXInputs[i].Signature = signature
+
+
+	}
+
+
+
+
+
+
+}
+func (tx *Transaction)TrimmedCopy()Transaction  {
+	var inputs   []TXInput
+	var outputs  []TXOutput
+	for _,input := range tx.TXInputs{inputs = append(inputs,TXInput{input.TXid,input.Index,nil,nil})
+
+	}
+	for _,output :=range tx.TXOutputs{
+		outputs = append(outputs,output)
+	}
+	return Transaction{tx.TXID,inputs,outputs}
+
+}
+//校验
+//对每个签名过的input进行校验
+//把coinbase除外
+func (tx *Transaction)Verify(prevTXs map[string]Transaction) bool{
+	if tx.IsCoinbase(){
+		return true
+	}
+	//1得到签名数据
+	txCopy := tx.TrimmedCopy()
+
+	//2.得到signature 反推回r，s
+	for i,input := range tx.TXInputs{
+		prevTXs := prevTXs[string(input.TXid)]
+		if len(prevTXs.TXID)==0 {
+			log.Panic("引用无效")
+		}
+		txCopy.TXInputs[i].PubKey = prevTXs.TXOutputs[input.Index].PukKeyHash
+		txCopy.SetHash()
+
+		dataHash := txCopy.TXID
+		//3拆解pubkey
+		signature := input.Signature  //拆  r s
+		pubKey := input.PubKey       //拆 X Y
+		//定义两个 big int
+		r := big.Int{}
+		s := big.Int{}
+
+		//拆分signature 平均分给r和s
+		r.SetBytes(signature[0:len(signature)/2])
+		s.SetBytes(signature[len(signature)/2:])
+		X := big.Int{}
+		Y := big.Int{}
+
+		//拆分signature 平均分给r和s
+		X.SetBytes(pubKey[0:len(pubKey)/2])
+		Y.SetBytes(pubKey[len(pubKey)/2:])
+		pubKeyOrign := ecdsa.PublicKey{elliptic.P256(),&X,&Y}
+		//verify
+		if !ecdsa.Verify(&pubKeyOrign,dataHash,&r,&s){
+			return false
+		}
+	}
+
+	return true
+
+}
+
+func (tx Transaction) String() string {
+	var lines []string
+
+	lines = append(lines, fmt.Sprintf("--- Transaction %x:", tx.TXID))
+
+	for i, input := range tx.TXInputs {
+
+		lines = append(lines, fmt.Sprintf("     Input %d:", i))
+		lines = append(lines, fmt.Sprintf("       TXID:      %x", input.TXid))
+		lines = append(lines, fmt.Sprintf("       Out:       %d", input.Index))
+		lines = append(lines, fmt.Sprintf("       Signature: %x", input.Signature))
+		lines = append(lines, fmt.Sprintf("       PubKey:    %x", input.PubKey))
+	}
+
+	for i, output := range tx.TXOutputs{
+		lines = append(lines, fmt.Sprintf("     Output %d:", i))
+		lines = append(lines, fmt.Sprintf("       Value:  %f", output.Value))
+		lines = append(lines, fmt.Sprintf("       Script: %x",output.PukKeyHash ))
+	}
+
+	return strings.Join(lines, "\n")
 }

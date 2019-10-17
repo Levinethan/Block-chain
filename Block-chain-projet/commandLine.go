@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"time"
 )
 
 
@@ -17,7 +16,10 @@ func (cli *CLI)PrintBlockChainReverse () {
 	it := bc.NewIterator()
 	for {
 		block := it.Next() //返回区块 然后左移
-		fmt.Printf("版本号 %d\n",block.Version)
+		for _, tx := range block.Transactions{
+			fmt.Println(tx)
+		}
+		/*fmt.Printf("版本号 %d\n",block.Version)
 		fmt.Printf("前区块HASH： %x\n",block.PrevHash)
 		fmt.Printf("merkel根 %x\n",block.MerkelRoot)
 		timeFormat := time.Unix(int64(block.TimeStamp),0).Format("2006-01-02 15:04:05")
@@ -26,6 +28,8 @@ func (cli *CLI)PrintBlockChainReverse () {
 		fmt.Printf("难度值 :%d\n",block.Difficulty)
 		fmt.Printf("当前区块HASH： %x\n",block.Hash)
 		fmt.Printf("区块HASH数据： %s\n",block.Transactions[0].TXInputs[0].PubKey)
+
+		*/
 		if len(block.PrevHash)==0 {
 			fmt.Printf("遍历结束")
 			break
@@ -80,9 +84,23 @@ func (cli *CLI)Send(from,to string,amount float64,miner ,data string)  {
 //逻辑 cli调用   实现commandline 实现
 
 func (cli *CLI)NewWallet()  {
-	wallet := NewWallet()
-	address := wallet.NewAddress()
-	fmt.Printf("私钥  %v\n",wallet.Private)
-	fmt.Printf("公钥 %v\n",wallet.PubKey)
+	ws := NewWallets()
+	//ws.CreateWallet()
+
+
+	//wallet := NewWallet()
+	address := ws.CreateWallet()
+	//ws := NewWallets()
+	//for address := range ws.WalletsMap{
 	fmt.Printf("地址 %s\n",address)
+
+	//}
+
+}
+func (cli *CLI)ListAddresses()  {
+	ws := NewWallets()
+	addresses :=ws.ListAllAddresses()
+	for _, address := range addresses{
+		fmt.Printf("地址 %s\n",address)
+	}
 }
